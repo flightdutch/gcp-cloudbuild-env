@@ -1,12 +1,11 @@
 name: Terraform check
 
+# ==============================================================================
+# TRIGGER CONFIGURATION
+# Changed from auto-push to manual trigger only to temporarily pause automation
+# ==============================================================================
 on:
-  push:
-    branches:
-      - main
-  pull_request:
-    branches:
-      - main
+  workflow_dispatch: # Allows manual trigger via GitHub UI, disables automatic runs
 
 env:
   FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: "true"
