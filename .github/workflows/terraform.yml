@@ -14,13 +14,13 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-    # 1. Клонуємо код репозиторію
+    # 1. Checkout repository code using modern Node.js 24 compatible action
     - name: Checkout Code
-      uses: actions/checkout@v4
+      uses: actions/checkout@v6.0.2
 
-    # 2. Встановлюємо Terraform у ранер
+    # 2. Setup Terraform CLI on the runner
     - name: Setup Terraform
-      uses: hashicorp/setup-terraform@v3
+      uses: hashicorp/setup-terraform@v3.1.2
 
 
     # 4. check Terraform
