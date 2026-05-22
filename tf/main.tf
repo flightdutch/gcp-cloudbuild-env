@@ -1,3 +1,4 @@
+
 # ==============================================================================
 # STORAGE RESOURCES
 # ==============================================================================
@@ -17,18 +18,4 @@ resource "google_storage_bucket" "raw_logs" {
       type = "Delete"
     }
   }
-}
-
-# ==============================================================================
-# DATABASE RESOURCES (Firestore)
-# ==============================================================================
-
-# App Engine-less Firestore Database instantiation for system state and tracking
-resource "google_firestore_database" "database" {
-  name        = "(default)"
-  location_id = var.gcp_region
-  type        = "FIRESTORE_NATIVE"
-
-  # Prevents accidental deletion of the state database during terraform destroy
-  deletion_policy = "POINT_IN_TIME_RECOVERY_RESTORATION_ONLY"
 }
