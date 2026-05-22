@@ -45,7 +45,11 @@ jobs:
 
     # 4. Initialize Terraform config inside the tf/ folder
     - name: Terraform Init
-      run: terraform init
+      run: |
+        # Pass the name of tfstate-bucket to terraform via GitHub Actions Workflow
+        terraform init \
+          -backend-config="bucket=${{ vars.GCP_PROJECT_ID }}-tfstate" \
+          -backend-config="prefix=terraform/state"
 
     # 5. Check code formatting
     - name: Terraform Format

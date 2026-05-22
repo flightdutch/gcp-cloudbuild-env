@@ -9,8 +9,3 @@ variable "gcp_region" {
   default     = "europe-west3" # Ваш дефолтний регіон Франкфурт
 }
 
-variable "gcs_tfstate_bucket" {
-  type        = string
-  description = "GCP-bucket for remote tf-state storage"
-  default = "bf-analyzer-tfstate"
-}

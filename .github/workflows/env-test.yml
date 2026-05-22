@@ -41,9 +41,10 @@ jobs:
 
 
     # 4. check Terraform
-    - name: Terraform Init
+    - name: terraform version check
       run: |
         echo "Display default terraform version"
         terraform version
         echo "Display Node.js version"
         node -v
+
