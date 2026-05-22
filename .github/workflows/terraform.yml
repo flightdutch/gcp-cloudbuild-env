@@ -25,6 +25,9 @@ jobs:
     # 1. Checkout repository code using modern Node.js 24 compatible action
     - name: Checkout Code
       uses: actions/checkout@v6.0.2
+      run: |
+        echo "Display Node.js version"
+        node -v
 
     # 2. GCP-Authenticate: Workload Identity Federation (tmp-token)
     - name: Authenticate to Google Cloud
