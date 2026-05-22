@@ -16,7 +16,6 @@ resource "google_project_service" "firestore" {
 # App Engine-less Firestore Database instantiation for system state and tracking
 resource "google_firestore_database" "database" {
   name        = "${var.gcp_project_id}-db"
-  # name        = "(default)"
   location_id = var.gcp_region
   type        = "FIRESTORE_NATIVE"
 
