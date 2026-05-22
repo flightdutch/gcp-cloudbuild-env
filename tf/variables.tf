@@ -12,5 +12,5 @@ variable "gcp_region" {
 variable "gcs_tfstate_bucket" {
   type        = string
   description = "GCP-bucket for remote tf-state storage"
-  bucket = "bf-analyzer-tfstate"
+  default = "bf-analyzer-tfstate"
 }
