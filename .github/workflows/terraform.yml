@@ -1,0 +1,30 @@
+name: Terraform check
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+    branches:
+      - main
+
+jobs:
+  terraform:
+    name: 'Terraform Action'
+    runs-on: ubuntu-latest
+
+    steps:
+    # 1. Клонуємо код репозиторію
+    - name: Checkout Code
+      uses: actions/checkout@v4
+
+    # 2. Встановлюємо Terraform у ранер
+    - name: Setup Terraform
+      uses: hashicorp/setup-terraform@v3
+
+
+    # 4. check Terraform
+    - name: Terraform Init
+      run: |
+        echo "Display default terraform version"
+        terraform version
