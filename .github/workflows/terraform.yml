@@ -11,6 +11,11 @@ on:
 env:
   FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: "true"
 
+# КРИТИЧНО ДЛЯ WIF: GitHub повинен мати право записувати id-token
+permissions:
+  contents: read
+  id-token: write
+
 jobs:
   terraform:
     name: 'Terraform Action'
