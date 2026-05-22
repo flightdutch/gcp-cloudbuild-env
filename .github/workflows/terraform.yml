@@ -21,7 +21,15 @@ jobs:
     - name: Checkout Code
       uses: actions/checkout@v6.0.2
 
-    # 2. Setup Terraform CLI on the runner
+    # 2. GCP-Authenticate: Workload Identity Federation (tmp-token)
+    - name: Authenticate to Google Cloud
+      id: auth
+      uses: google-github-actions/auth@v2
+      with:
+        workload_identity_provider: ${{ vars.GCP_WORKLOAD_IDENTITY_PROVIDER }}
+        service_account: ${{ vars.GCP_SERVICE_ACCOUNT }}
+
+    # 3. Setup Terraform CLI on the runner
     - name: Setup Terraform
       uses: hashicorp/setup-terraform@v3.1.2
       with:
