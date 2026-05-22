@@ -1,0 +1,23 @@
+terraform {
+  required_version = ">= 1.8.0" # Сумісно з нашою версією 1.15.4
+
+  # 1. Визначаємо необхідні провайдери
+  required_providers {
+    google = {
+      source  = "hashicorp/google"
+      version = "~> 5.0" # Використовуємо стабільну 5.х гілку провайдера
+    }
+  }
+
+  # 2. Налаштовуємо віддалене збереження стану (Бекенд)
+  backend "gcs" {
+    bucket = var.gcs_tfstate_bucket # Назва бакету з Кроку 1
+    prefix = "terraform/state"            # Шлях всередині бакету, де лежатиме файл
+  }
+}
+
+# 3. Налаштування самого провайдера Google
+provider "google" {
+  project = var.gcp_project_id
+  region  = var.gcp_region
+}

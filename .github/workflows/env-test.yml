@@ -1,0 +1,50 @@
+name: Terraform check
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+    branches:
+      - main
+
+env:
+  FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: "true"
+
+# КРИТИЧНО ДЛЯ WIF: GitHub повинен мати право записувати id-token
+permissions:
+  contents: read
+  id-token: write
+
+jobs:
+  terraform:
+    name: 'Terraform Action'
+    runs-on: ubuntu-latest
+
+    steps:
+    # 1. Checkout repository code using modern Node.js 24 compatible action
+    - name: Checkout Code
+      uses: actions/checkout@v6.0.2
+
+    # 2. GCP-Authenticate: Workload Identity Federation (tmp-token)
+    - name: Authenticate to Google Cloud
+      id: auth
+      uses: google-github-actions/auth@v3
+      with:
+        workload_identity_provider: ${{ vars.GCP_WORKLOAD_IDENTITY_PROVIDER }}
+        service_account: ${{ vars.GCP_SERVICE_ACCOUNT }}
+
+    # 3. Setup Terraform CLI on the runner
+    - name: Setup Terraform
+      uses: hashicorp/setup-terraform@v3.1.2
+      with:
+        terraform_version: "1.15.4"
+
+
+    # 4. check Terraform
+    - name: Terraform Init
+      run: |
+        echo "Display default terraform version"
+        terraform version
+        echo "Display Node.js version"
+        node -v
