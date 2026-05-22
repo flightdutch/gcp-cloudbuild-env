@@ -1,0 +1,61 @@
+name: Terraform Deployment
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+    branches:
+      - main
+
+permissions:
+  contents: read
+  id-token: write
+
+jobs:
+  terraform:
+    name: 'Terraform Action'
+    runs-on: ubuntu-latest
+
+    # Global setting to run all steps inside the tf/ subdirectory
+    defaults:
+      run:
+        working-directory: ./tf
+
+    steps:
+    # 1. Checkout repository code
+    - name: Checkout Code
+      uses: actions/checkout@v6.0.2
+
+    # 2. Authenticate to Google Cloud using WIF
+    - name: Authenticate to Google Cloud
+      id: auth
+      uses: google-github-actions/auth@v2.1.3
+      with:
+        workload_identity_provider: ${{ vars.GCP_WORKLOAD_IDENTITY_PROVIDER }}
+        service_account: ${{ vars.GCP_SERVICE_ACCOUNT }}
+        # Generates credentials file directly inside the working directory workspace
+        create_credentials_file: true
+
+    # 3. Setup Terraform CLI on the runner
+    - name: Setup Terraform
+      uses: hashicorp/setup-terraform@v3.1.2
+      with:
+        terraform_version: "1.15.4"
+
+    # 4. Initialize Terraform config inside the tf/ folder
+    - name: Terraform Init
+      run: terraform init
+
+    # 5. Check code formatting
+    - name: Terraform Format
+      run: terraform fmt -check
+
+    # 6. Generate speculative execution plan
+    - name: Terraform Plan
+      run: terraform plan -var="gcp_project_id=${{ vars.GCP_PROJECT_ID }}"
+
+    # 7. Apply infrastructure changes (Main branch pushes only)
+    - name: Terraform Apply
+      if: github.ref == 'refs/heads/main' && github.event_name == 'push'
+      run: terraform apply -auto-approve -var="gcp_project_id=${{ vars.GCP_PROJECT_ID }}"
