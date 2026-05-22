@@ -8,6 +8,9 @@ on:
     branches:
       - main
 
+env:
+  FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: "true"
+
 jobs:
   terraform:
     name: 'Terraform Action'
@@ -21,6 +24,8 @@ jobs:
     # 2. Setup Terraform CLI on the runner
     - name: Setup Terraform
       uses: hashicorp/setup-terraform@v3.1.2
+      with:
+        terraform_version: "1.15.4"
 
 
     # 4. check Terraform
@@ -28,3 +33,5 @@ jobs:
       run: |
         echo "Display default terraform version"
         terraform version
+        echo "Display Node.js version"
+        node -v
