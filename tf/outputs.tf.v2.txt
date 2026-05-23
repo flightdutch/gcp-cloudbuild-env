@@ -18,6 +18,6 @@ output "firebase_config" {
     messagingSenderId = data.google_firebase_web_app_config.frontend_config.messaging_sender_id
     appId             = google_firebase_web_app.frontend.app_id
     # Dynamic reference to the actual Firestore database resource name
-    firestoreDbId = google_firestore_database.default.name
+    firestoreDbId     = google_firestore_database.default.name
   }
 }
