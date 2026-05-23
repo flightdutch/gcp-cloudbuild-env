@@ -1,31 +1,22 @@
-# tf/firebase-bucket.tf
-
 # ==============================================================================
-# FIREBASE STORAGE BUCKET (Physical Provisioning via GCS)
+# FIREBASE STORAGE BUCKET (Physical Initialization)
 # ==============================================================================
 
-# Creates the underlying physical Cloud Storage bucket with explicit regional location
-resource "google_storage_bucket" "firebase_storage" {
-  # Google requires standard Firebase buckets to match this exact naming format
-  name          = "${var.gcp_project_id}.firebasestorage.app"
-  location      = var.gcp_region
-  force_destroy = false
-
-  # Enforces uniform bucket-level IAM permissions, standard for Firebase
-  uniform_bucket_level_access = true
-
-  # Prevents public access via standard GCS URLs; access is managed via Firebase Rules
-  public_access_prevention = "enforced"
-
-  # Wait for the core Firebase project setup and propagation delay to finish
-  depends_on = [time_sleep.wait_90_seconds]
-}
-
-# Links the physical GCS bucket into the Firebase Management layer
+# Explicitly provisions the default Firebase Storage bucket to avoid lazy-init issues
 resource "google_firebase_storage_bucket" "default" {
   provider  = google-beta
   project   = var.gcp_project_id
-  bucket_id = google_storage_bucket.firebase_storage.name
+  bucket_id = "${var.gcp_project_id}.firebasestorage.app"
+
+  # Ensure this happens after the main Firebase project framework is ready
+  # Links directly to the project definition in firebase.tf
+  # and GCS-storage will be activated
+  # CRITICAL: Force the bucket to wait for the 90-second propagation delay
+  depends_on = [
+    google_firebase_project.default,
+    google_project_service.firebase_storage,
+    time_sleep.wait_90_seconds # Adds cross-file dependency to ensure APIs and internal service accounts are ready
+  ]
 }
 
 # ==============================================================================
@@ -54,7 +45,7 @@ EOF
     }
   }
 
-  # Wait for the Firebase-linked bucket metadata to exist first
+  # Wait for the physical bucket to exist before defining rules for it
   depends_on = [google_firebase_storage_bucket.default]
 }
 
@@ -65,5 +56,6 @@ resource "google_firebaserules_release" "storage" {
   name         = "firebase.storage/${var.gcp_project_id}.firebasestorage.app"
   ruleset_name = google_firebaserules_ruleset.storage.name
 
+  # Ensure the ruleset object is fully created before releasing it
   depends_on = [google_firebaserules_ruleset.storage]
 }
