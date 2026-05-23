@@ -74,3 +74,27 @@ jobs:
         # The -json flag bypasses the <sensitive> mask layout inside runner logs
         terraform output -json firebase_config
         echo "===================================================="
+
+    # 9. Save pure Firebase json-config
+    - name: Generate Firebase Client Config
+      if: github.ref == 'refs/heads/main' && github.event_name == 'push'
+      run: |
+        mkdir -p ./frontend-config
+
+        # 1. Extract pure JSON from terraform outputs, bypassing the sensitive mask
+        # 2. Save it directly into a clean JSON file
+        terraform output -json firebase_config > ./frontend-config/firebase-config.json
+
+        echo " Firebase configuration successfully generated!"
+        echo " File preview (keys are masked by GitHub for security):"
+        cat ./frontend-config/firebase-config.json
+
+    # 10. Опціонально: зберігаємо конфіг як артефакт GitHub Actions,
+    # щоб розробники могли завантажити його прямо з вкладки Actions
+    - name: Upload Firebase Config Artifact
+      if: github.ref == 'refs/heads/main' && github.event_name == 'push'
+      uses: actions/upload-artifact@v4
+      with:
+        name: firebase-client-config
+        path: ./frontend-config/firebase-config.json
+        retention-days: 7
