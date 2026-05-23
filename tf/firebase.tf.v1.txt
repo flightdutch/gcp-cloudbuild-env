@@ -1,0 +1,42 @@
+terraform {
+  required_providers {
+    google-beta = {
+      source  = "hashicorp/google-beta"
+      version = "~> 5.0"
+    }
+    # Додаємо провайдер для роботи з паузами
+    time = {
+      source  = "hashicorp/time"
+      version = "~> 0.11"
+    }
+  }
+}
+
+provider "google-beta" {
+  project = var.gcp_project_id
+  region  = var.gcp_region
+}
+
+# 1. Вмикаємо Firebase API в проекті
+resource "google_project_service" "firebase" {
+  provider           = google-beta
+  project            = var.gcp_project_id
+  service            = "firebase.googleapis.com"
+  disable_on_destroy = false
+}
+
+# 2. Прив'язуємо проект до Firebase
+resource "google_firebase_project" "default" {
+  provider   = google-beta
+  project    = var.gcp_project_id
+  depends_on = [google_project_service.firebase]
+}
+
+# 3. МІСЦЕ ДЛЯ ТIME_SLEEP: Робимо паузу після створення Firebase проекту
+# Вона триватиме 90 секунд, щоб Google встиг згенерувати всі сервісні акаунти.
+resource "time_sleep" "wait_for_firebase_services" {
+  create_duration = "90s"
+
+  # Пауза почнеться ТІЛЬКИ після того, як успішно відпрацює google_firebase_project
+  depends_on = [google_firebase_project.default]
+}
