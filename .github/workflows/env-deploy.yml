@@ -79,6 +79,7 @@ jobs:
     - name: Generate Firebase Client Config
       if: github.ref == 'refs/heads/main' && github.event_name == 'push'
       run: |
+        echo "current path - $PWD"
         mkdir -p ./frontend-config
 
         # 1. Extract pure JSON from terraform outputs, bypassing the sensitive mask
@@ -96,5 +97,5 @@ jobs:
       uses: actions/upload-artifact@v4
       with:
         name: firebase-client-config
-        path: ./frontend-config/firebase-config.json
+        path: ./tf/frontend-config/firebase-config.json
         retention-days: 7
