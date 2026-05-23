@@ -11,6 +11,13 @@ resource "google_project_service" "firebase" {
   disable_on_destroy = false
 }
 
+# Activate Cloud Storage for Firebase API
+resource "google_project_service" "firebase_storage" {
+  project            = var.gcp_project_id
+  service            = "firebasestorage.googleapis.com"
+  disable_on_destroy = false
+}
+
 # ==============================================================================
 # FIREBASE INITIALIZATION
 # ==============================================================================
@@ -20,8 +27,11 @@ resource "google_firebase_project" "default" {
   provider = google-beta
   project  = var.gcp_project_id
 
-  # Ensures Firebase is not initialized before the API is fully active
-  depends_on = [google_project_service.firebase]
+  # Ensures: both APIs are enabled before linking the project
+  depends_on = [
+    google_project_service.firebase,
+    google_project_service.firebase_storage
+  ]
 }
 
 # ==============================================================================

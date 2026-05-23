@@ -10,7 +10,11 @@ resource "google_firebase_storage_bucket" "default" {
 
   # Ensure this happens after the main Firebase project framework is ready
   # Links directly to the project definition in firebase.tf
-  depends_on = [google_firebase_project.default]
+  # and GCS-storage will be activated
+  depends_on = [
+    google_firebase_project.default,
+    google_project_service.firebase_storage
+  ]
 }
 
 # ==============================================================================
