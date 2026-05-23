@@ -1,22 +1,27 @@
 # tf/firebase-bucket.tf
 
 # ==============================================================================
-# FIREBASE STORAGE BUCKET (Clean naming without domain dots)
+# FIREBASE STORAGE BUCKET (Physical Provisioning via GCS)
 # ==============================================================================
 
+# Creates the underlying physical Cloud Storage bucket using the standard appspot domain
 resource "google_storage_bucket" "firebase_storage" {
-  # 👇 CHANGED: Removed dots to bypass Google's Domain Ownership Verification check
-  name          = "${var.gcp_project_id}-firebase-storage"
+  # 👇 CHANGED: Google requires the default project bucket to use .appspot.com format
+  name          = "${var.gcp_project_id}.appspot.com"
   location      = var.gcp_region
   force_destroy = false
 
+  # Enforces uniform bucket-level IAM permissions, standard for Firebase
   uniform_bucket_level_access = true
-  public_access_prevention    = "enforced"
 
+  # Prevents public access via standard GCS URLs; access is managed via Firebase Rules
+  public_access_prevention = "enforced"
+
+  # Wait for the core Firebase project setup and propagation delay to finish
   depends_on = [time_sleep.wait_90_seconds]
 }
 
-# Link our custom bucket to Firebase Management layer
+# Links the physical GCS bucket into the Firebase Management layer
 resource "google_firebase_storage_bucket" "default" {
   provider  = google-beta
   project   = var.gcp_project_id
@@ -27,6 +32,7 @@ resource "google_firebase_storage_bucket" "default" {
 # FIREBASE STORAGE SECURITY RULES
 # ==============================================================================
 
+# Defines the actual security rule logic for file access control
 resource "google_firebaserules_ruleset" "storage" {
   provider = google-beta
   project  = var.gcp_project_id
@@ -39,6 +45,7 @@ rules_version = '2';
 service firebase.storage {
   match /b/{bucket}/o {
     match /{allPaths=**} {
+      // Allows read/write access only to authenticated users
       allow read, write: if request.auth != null;
     }
   }
@@ -47,14 +54,16 @@ EOF
     }
   }
 
+  # Wait for the Firebase-linked bucket metadata to exist first
   depends_on = [google_firebase_storage_bucket.default]
 }
 
+# Releases and binds the defined ruleset specifically to the Firebase Storage service
 resource "google_firebaserules_release" "storage" {
   provider = google-beta
   project  = var.gcp_project_id
-  # 👇 CHANGED: Match the new custom bucket name format
-  name         = "firebase.storage/${var.gcp_project_id}-firebase-storage"
+  # 👇 CHANGED: Matching the exact name of the appspot bucket
+  name         = "firebase.storage/${var.gcp_project_id}.appspot.com"
   ruleset_name = google_firebaserules_ruleset.storage.name
 
   depends_on = [google_firebaserules_ruleset.storage]
