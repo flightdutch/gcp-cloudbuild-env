@@ -1,7 +1,7 @@
 # tf/provider.tf
 
 terraform {
-  required_version = ">= 1.8.0"   # Сумісно з нашою версією 1.15.4
+  required_version = ">= 1.8.0" # Сумісно з нашою версією 1.15.4
 
   # 1. Визначаємо необхідні провайдери
   required_providers {
@@ -22,12 +22,12 @@ terraform {
   }
 
   # 2. connect to the tfstate-bucket by default
- # backend "gcs" {
- #   bucket = "bf-analyzer-tfstate"
- #   prefix = "terraform/state"
- # }
+  # backend "gcs" {
+  #   bucket = "bf-analyzer-tfstate"
+  #   prefix = "terraform/state"
+  # }
 
- # 2. Left empty inside the repository code to allow dynamic injection
+  # 2. Left empty inside the repository code to allow dynamic injection
   backend "gcs" {}
 }
 
@@ -36,7 +36,7 @@ provider "google" {
   region  = var.gcp_region
 }
 
-# 👇 Configuring the beta provider (Firebase-config)
+# Configuring the beta provider (Firebase-config)
 provider "google-beta" {
   project = var.gcp_project_id
   region  = var.gcp_region
