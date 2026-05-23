@@ -80,15 +80,16 @@ jobs:
       if: github.ref == 'refs/heads/main' && github.event_name == 'push'
       run: |
         echo "current path - $PWD"
-        mkdir -p ./frontend-config
+        echo "workspace - ${{ github.workspace }}"
+        mkdir -p ${{ github.workspace }}/frontend-config
 
         # 1. Extract pure JSON from terraform outputs, bypassing the sensitive mask
         # 2. Save it directly into a clean JSON file
-        terraform output -json firebase_config > ./frontend-config/firebase-config.json
+        terraform output -json firebase_config > ${{ github.workspace }}/frontend-config/firebase-config.json
 
         echo " Firebase configuration successfully generated!"
         echo " File preview (keys are masked by GitHub for security):"
-        cat ./frontend-config/firebase-config.json
+        cat ${{ github.workspace }}/frontend-config/firebase-config.json
 
     # 10. Опціонально: зберігаємо конфіг як артефакт GitHub Actions,
     # щоб розробники могли завантажити його прямо з вкладки Actions
@@ -97,5 +98,5 @@ jobs:
       uses: actions/upload-artifact@v4
       with:
         name: firebase-client-config
-        path: ./tf/frontend-config/firebase-config.json
+        path: ${{ github.workspace }}/frontend-config/firebase-config.json
         retention-days: 7
