@@ -11,9 +11,11 @@ resource "google_firebase_storage_bucket" "default" {
   # Ensure this happens after the main Firebase project framework is ready
   # Links directly to the project definition in firebase.tf
   # and GCS-storage will be activated
+  # CRITICAL: Force the bucket to wait for the 90-second propagation delay
   depends_on = [
     google_firebase_project.default,
-    google_project_service.firebase_storage
+    google_project_service.firebase_storage,
+    time_sleep.wait_90_seconds # Adds cross-file dependency to ensure APIs and internal service accounts are ready
   ]
 }
 
