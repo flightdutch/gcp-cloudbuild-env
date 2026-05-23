@@ -4,10 +4,10 @@
 # FIREBASE STORAGE BUCKET (Physical Provisioning via GCS)
 # ==============================================================================
 
-# Creates the underlying physical Cloud Storage bucket with explicit regional location
+# Creates the underlying physical Cloud Storage bucket using the standard appspot domain
 resource "google_storage_bucket" "firebase_storage" {
-  # Google requires standard Firebase buckets to match this exact naming format
-  name          = "${var.gcp_project_id}.firebasestorage.app"
+  # 👇 CHANGED: Google requires the default project bucket to use .appspot.com format
+  name          = "${var.gcp_project_id}.appspot.com"
   location      = var.gcp_region
   force_destroy = false
 
@@ -60,9 +60,10 @@ EOF
 
 # Releases and binds the defined ruleset specifically to the Firebase Storage service
 resource "google_firebaserules_release" "storage" {
-  provider     = google-beta
-  project      = var.gcp_project_id
-  name         = "firebase.storage/${var.gcp_project_id}.firebasestorage.app"
+  provider = google-beta
+  project  = var.gcp_project_id
+  # 👇 CHANGED: Matching the exact name of the appspot bucket
+  name         = "firebase.storage/${var.gcp_project_id}.appspot.com"
   ruleset_name = google_firebaserules_ruleset.storage.name
 
   depends_on = [google_firebaserules_ruleset.storage]
