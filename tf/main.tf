@@ -19,3 +19,17 @@ resource "google_storage_bucket" "raw_logs" {
     }
   }
 }
+
+# modify bucket-config - enable versions
+resource "google_storage_bucket" "tfstate" {
+  name          = ${{ vars.GCP_PROJECT_ID }}-tfstate
+  location      = var.gcp_region
+  force_destroy = false
+
+  versioning {
+    enabled = true
+  }
+
+  # add security
+  public_access_prevention = "enforced"
+}
