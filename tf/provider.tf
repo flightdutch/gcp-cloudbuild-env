@@ -1,9 +1,9 @@
 # tf/provider.tf
 
 terraform {
-  required_version = ">= 1.8.0" # Сумісно з нашою версією 1.15.4
+  required_version = ">= 1.8.0" # Compatible with the last terraform version 1.15.4
 
-  # 1. Визначаємо необхідні провайдери
+  # 1.  determine all the necessary providers
   required_providers {
     google = {
       source  = "hashicorp/google"
@@ -28,6 +28,7 @@ terraform {
   # }
 
   # 2. Left empty inside the repository code to allow dynamic injection
+  # by workflow - step 4. Initialize Terraform config inside the tf/ folder
   backend "gcs" {}
 }
 

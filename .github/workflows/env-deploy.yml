@@ -12,6 +12,12 @@ permissions:
   contents: read
   id-token: write
 
+# run only 1 pipeline
+# Do not cancel the current apply, so as not to break the state halfway
+concurrency:
+  group: terraform-pipeline
+  cancel-in-progress: false
+
 jobs:
   terraform:
     name: 'Terraform Action'
@@ -56,16 +62,20 @@ jobs:
     - name: Terraform Format
       run: terraform fmt -check
 
-    # 6. Generate speculative execution plan
+    # 6. Auto-validate code
+    - name: Terraform Validate
+      run: terraform validate
+
+    # 7. G8enerate speculative execution plan
     - name: Terraform Plan
       run: terraform plan -var="gcp_project_id=${{ vars.GCP_PROJECT_ID }}"
 
-    # 7. Apply infrastructure changes (Main branch pushes only)
+    # 8. Apply infrastructure changes (Main branch pushes only)
     - name: Terraform Apply
       if: github.ref == 'refs/heads/main' && github.event_name == 'push'
       run: terraform apply -auto-approve -var="gcp_project_id=${{ vars.GCP_PROJECT_ID }}"
 
-    # 8. Enable outputs: Explicitly output sensitive data to GitHub Actions logs
+    # 9. Enable outputs: Explicitly output sensitive data to GitHub Actions logs
     - name: View Firebase Configuration
       if: github.ref == 'refs/heads/main' && github.event_name == 'push'
       run: |
@@ -76,7 +86,7 @@ jobs:
         terraform output -json firebase_config
         echo "===================================================="
 
-    # 9. Save pure Firebase json-config
+    # 10. Save pure Firebase json-config
     - name: Generate Firebase Client Config
       if: github.ref == 'refs/heads/main' && github.event_name == 'push'
       run: |
@@ -92,7 +102,7 @@ jobs:
         echo " File preview (keys are masked by GitHub for security):"
         cat ${{ github.workspace }}/frontend-config/firebase-config.json
 
-    # 10. Опціонально: зберігаємо конфіг як артефакт GitHub Actions,
+    # 11. Опціонально: зберігаємо конфіг як артефакт GitHub Actions,
     # щоб розробники могли завантажити його прямо з вкладки Actions
     - name: Upload Firebase Config Artifact
       if: github.ref == 'refs/heads/main' && github.event_name == 'push'
