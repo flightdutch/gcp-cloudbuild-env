@@ -44,6 +44,7 @@ jobs:
         terraform_version: "1.15.4"
 
     # 4. Initialize Terraform config inside the tf/ folder
+    #    and link to tfstate-bucket
     - name: Terraform Init
       run: |
         # Pass the name of tfstate-bucket to terraform via GitHub Actions Workflow
