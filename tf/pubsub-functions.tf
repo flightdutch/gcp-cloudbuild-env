@@ -7,6 +7,9 @@
 resource "google_service_account" "function_sa" {
   account_id   = "${var.gcp_project_id}-${var.service_account_suffix}"
   display_name = "Service Account for Log Analyzer Cloud Run Functions"
+
+  # wait until the IAM API (services.tf) is fully enabled
+  depends_on = [google_project_service.iam_api]
 }
 
 # ==========================================================================
@@ -34,6 +37,9 @@ resource "google_project_iam_member" "firestore_user" {
 # Create the central Pub/Sub topic using the dynamic project-ID prefix
 resource "google_pubsub_topic" "log_events" {
   name = "${var.gcp_project_id}-${var.pubsub_topic_name_suffix}"
+
+  # wait until the IAM API (services.tf) is fully enabled
+  depends_on = [google_project_service.iam_api]
 }
 
 # Allow Google Cloud Storage service to publish events into our Pub/Sub topic
