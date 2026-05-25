@@ -1,0 +1,88 @@
+name: 'Terraform Teardown & Clean-up GCP-infrastructure'
+
+# This workflow runs strictly manually via the Actions tab in the GitHub UI
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  id-token: write
+
+# Prevent parallel runs to avoid state locking if the main deployment is active
+concurrency:
+  group: terraform-pipeline
+  cancel-in-progress: false
+
+jobs:
+  teardown:
+    name: 'Gcloud Wipe & Terraform Destroy'
+    runs-on: ubuntu-latest
+
+    steps:
+    # 1. Checkout repository code
+    - name: Checkout Code
+      uses: actions/checkout@v6.0.2
+
+    # 2. Authenticate to Google Cloud using WIF
+    - name: Authenticate to Google Cloud
+      id: auth
+      uses: google-github-actions/auth@v3
+      with:
+        workload_identity_provider: ${{ vars.GCP_WORKLOAD_IDENTITY_PROVIDER }}
+        service_account: ${{ vars.GCP_SERVICE_ACCOUNT }}
+        # Generates credentials file directly inside the working directory workspace
+        create_credentials_file: true
+
+    # 3. Set up gcloud CLI utility
+    - name: Set up Cloud SDK
+      uses: google-github-actions/setup-gcloud@v2
+
+    # 4. Aggressive pre-cleanup via gcloud (bypasses terraform prevent_destroy and force_destroy)
+    - name: Force Delete Heavy Resources via Gcloud
+      run: |
+        echo " Starting forced data resource cleanup..."
+
+        # Forcefully delete the raw logs bucket with all its contents (--recursive)
+        # The --quiet flag disables interactive "Are you sure?" prompts
+        if gcloud storage buckets describe gs://${{ vars.GCP_PROJECT_ID }}-raw-logs &>/dev/null; then
+          echo " Deleting log bucket: gs://${{ vars.GCP_PROJECT_ID }}-raw-logs"
+          gcloud storage buckets delete gs://${{ vars.GCP_PROJECT_ID }}-raw-logs --recursive --quiet || true
+        else
+          echo " Log bucket already deleted or does not exist."
+        fi
+
+        # Forcefully delete the technical bucket containing function deployment packages
+        if gcloud storage buckets describe gs://${{ vars.GCP_PROJECT_ID }}-gcf-source &>/dev/null; then
+          echo " Deleting function source code bucket: gs://${{ vars.GCP_PROJECT_ID }}-gcf-source"
+          gcloud storage buckets delete gs://${{ vars.GCP_PROJECT_ID }}-gcf-source --recursive --quiet || true
+        else
+          echo "ℹ️ Function source bucket already deleted or does not exist."
+        fi
+
+    # 5. Install and initialize Terraform
+    - name: Setup Terraform
+      uses: hashicorp/setup-terraform@v3
+
+    - name: Terraform Init
+      run: terraform init
+
+    # 6. Final destruction of remaining infrastructure (SAs, Functions, IAM roles)
+    - name: Terraform Destroy
+      env:
+        TF_VAR_gcp_project_id: ${{ vars.GCP_PROJECT_ID }}
+        TF_VAR_gcp_region: ${{ vars.GCP_REGION }}
+      run: |
+        echo " Running terraform destroy for the remaining resources..."
+        # -auto-approve applies the changes automatically without interactive confirmation
+        terraform destroy -auto-approve
+
+    # 7. tfstate-bucket: Clearing the contents (without deleting the bucket itself)
+    - name: Clean Up State Bucket Contents
+      run: |
+        echo " Clearing history and versions inside the state bucket..."
+        # This deletes all state files and their history, leaving the bucket completely empty and free
+        gcloud storage rm gs://${{ vars.GCP_PROJECT_ID }}-tfstate/** --recursive --quiet || true
+        echo " State bucket is now empty, holding 0 bytes."
+
+    - name: Post-Teardown Status
+      run: echo " Project infrastructure has been completely and successfully cleared!"
