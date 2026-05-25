@@ -6,6 +6,23 @@ variable "gcp_project_id" {
 variable "gcp_region" {
   type        = string
   description = "The default region for GCP resources"
-  default     = "europe-west3" # Ваш дефолтний регіон Франкфурт
+  default     = "europe-west3"
 }
 
+variable "log_bucket_name_suffix" {
+  type        = string
+  description = "Suffix for the raw logs storage bucket"
+  default     = "raw-logs"
+}
+
+variable "pubsub_topic_name_suffix" {
+  type        = string
+  description = "Suffix for the Pub/Sub topic for log events"
+  default     = "log-events"
+}
+
+variable "service_account_suffix" {
+  type        = string
+  description = "Suffix for the dedicated service account name"
+  default     = "fn-sa"
+}

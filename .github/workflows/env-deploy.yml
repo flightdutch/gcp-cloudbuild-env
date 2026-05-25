@@ -8,6 +8,10 @@ on:
     branches:
       - main
 
+# This workflow runs strictly manually via the Actions tab in the GitHub UI
+#on:
+#  workflow_dispatch:
+
 permissions:
   contents: read
   id-token: write
