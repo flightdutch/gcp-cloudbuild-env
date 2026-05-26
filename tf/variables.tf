@@ -56,3 +56,9 @@ variable "terraform_sa_name" {
   default     = "github-deployer"
   description = "The name of the service account used by GitHub Actions for deployment"
 }
+
+variable "artifact_registry_retention_count" {
+  type        = number
+  default     = 10
+  description = "The maximum number of recent container image versions to keep in Artifact Registry"
+}

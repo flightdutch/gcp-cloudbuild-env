@@ -69,8 +69,12 @@ if gcloud iam service-accounts describe ${PUBSUB_SA_EMAIL} --format="value(email
     fi
 
     # Check Eventarc Receiver Access
-    PROJECT_IAM=$(gcloud projects get-iam-policy ${PROJECT_ID} --format="json" 2>/dev/null)
-    if echo "$PROJECT_IAM" | grep -B 2 "serviceAccount:${PUBSUB_SA_EMAIL}" | grep -q "roles/eventarc.eventReceiver"; then
+    # Robust Eventarc verification via native gcloud filtering
+    HAS_EVENTARC=$(gcloud projects get-iam-policy ${PROJECT_ID} \
+        --filter="bindings.role:roles/eventarc.eventReceiver AND bindings.members:serviceAccount:${PUBSUB_SA_EMAIL}" \
+        --format="value(bindings.role)" 2>/dev/null)
+
+    if [ ! -z "$HAS_EVENTARC" ]; then
         echo "  ✅ IAM: Runtime SA has designated 'roles/eventarc.eventReceiver' status."
     else
         echo "  ❌ ERROR: Runtime SA is missing the required 'roles/eventarc.eventReceiver' project role!"
@@ -142,9 +146,13 @@ if gcloud iam service-accounts describe ${WIF_SA_EMAIL} --format="value(email)" 
         "roles/storage.admin"
     )
 
+    # Uses exact policy binding matching instead of text grep
     for ROLE in "${REQUIRED_ROLES[@]}"; do
-        # Validate if the specific role block contains our deployment SA member handle
-        if echo "$PROJECT_POLICY" | grep -B 2 "serviceAccount:${WIF_SA_EMAIL}" | grep -q "$ROLE"; then
+        MATCH=$(gcloud projects get-iam-policy ${PROJECT_ID} \
+            --filter="bindings.role:${ROLE} AND bindings.members:serviceAccount:${WIF_SA_EMAIL}" \
+            --format="value(bindings.role)" 2>/dev/null)
+
+        if [ ! -z "$MATCH" ]; then
             echo "  ✅ IAM: Verified assignment of ${ROLE}"
         else
             echo "  ❌ ERROR: Terraform Deployer SA is missing the required project role: ${ROLE}"
@@ -157,6 +165,7 @@ else
 fi
 
 echo ""
+
 echo "=========================================================================="
 
 # --------------------------------------------------------------------------
