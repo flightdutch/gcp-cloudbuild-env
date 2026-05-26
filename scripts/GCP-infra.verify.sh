@@ -137,8 +137,9 @@ if gcloud iam service-accounts describe ${WIF_SA_EMAIL} --format="value(email)" 
     REQUIRED_ROLES=(
         "roles/cloudfunctions.developer"
         "roles/run.developer"
-        "roles/artifactregistry.repositoryAdmin"
+        "roles/artifactregistry.admin"
         "roles/cloudbuild.builds.editor"
+        "roles/storage.admin"
     )
 
     for ROLE in "${REQUIRED_ROLES[@]}"; do

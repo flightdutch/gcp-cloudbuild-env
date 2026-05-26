@@ -7,7 +7,7 @@ locals {
   deployer_roles = [
     "roles/cloudfunctions.developer",
     "roles/run.developer",
-    "roles/artifactregistry.repositoryAdmin",
+    "roles/artifactregistry.admin", # SA has the right to create repositories at the project level
     "roles/cloudbuild.builds.editor",
     "roles/storage.admin" #  Added to manage raw-logs, tfstate, and staging deployment buckets
   ]
