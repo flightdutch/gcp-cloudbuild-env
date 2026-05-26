@@ -15,3 +15,10 @@ resource "google_project_service" "pubsub_api" {
   service            = "pubsub.googleapis.com"
   disable_on_destroy = false
 }
+
+# 3. Enable Cloud Scheduler API (required for time-based triggers)
+resource "google_project_service" "scheduler_api" {
+  project            = var.gcp_project_id
+  service            = "cloudscheduler.googleapis.com"
+  disable_on_destroy = false
+}

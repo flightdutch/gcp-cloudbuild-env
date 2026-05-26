@@ -26,3 +26,15 @@ variable "service_account_suffix" {
   description = "Suffix for the dedicated service account name"
   default     = "fn-sa"
 }
+
+variable "scheduler_name_suffix" {
+  type        = string
+  description = "Suffix for the Cloud Scheduler job"
+  default     = "report-cron"
+}
+
+variable "scheduler_timezone" {
+  type        = string
+  description = "The timezone for the Cloud Scheduler job (e.g., Europe/Kyiv, America/New_York)"
+  default     = "Europe/Kyiv"
+}
