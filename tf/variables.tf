@@ -44,3 +44,9 @@ variable "scheduler_cron_expression" {
   description = "The CRON expression for the Cloud Scheduler job (e.g., '0 1 * * *' for daily at 01:00 AM)"
   default     = "0 1 * * *"
 }
+
+variable "artifact_registry_suffix" {
+  type        = string
+  default     = "functions"
+  description = "Suffix for the Artifact Registry repository holding function images"
+}

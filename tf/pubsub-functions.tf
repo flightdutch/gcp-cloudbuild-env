@@ -30,6 +30,15 @@ resource "google_project_iam_member" "firestore_user" {
   member  = "serviceAccount:${google_service_account.function_sa.email}"
 }
 
+# Service Eventarc provides a connection between Pub/Sub and Cloud Run functionality
+resource "google_project_iam_member" "fn_sa_eventarc_receiver" {
+  project = var.gcp_project_id
+  role    = "roles/eventarc.eventReceiver"
+  member  = "serviceAccount:${var.gcp_project_id}-fn-sa@${var.gcp_project_id}.iam.gserviceaccount.com"
+
+  depends_on = [google_project_service.required_apis]
+}
+
 # ==========================================================================
 # 3. Pub/Sub Messaging Infrastructure (The Event-Driven Core)
 # ==========================================================================
