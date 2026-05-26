@@ -50,3 +50,9 @@ variable "artifact_registry_suffix" {
   default     = "functions"
   description = "Suffix for the Artifact Registry repository holding function images"
 }
+
+variable "terraform_sa_name" {
+  type        = string
+  default     = "github-deployer"
+  description = "The name of the service account used by GitHub Actions for deployment"
+}
