@@ -16,8 +16,8 @@ permissions:
   id-token: write
 
 jobs:
-  terraform:
-    name: 'Terraform Action'
+  test_wif:
+    name: 'WIF-connect to GCP'
     runs-on: ubuntu-latest
 
     steps:
@@ -33,14 +33,20 @@ jobs:
         workload_identity_provider: ${{ vars.GCP_WORKLOAD_IDENTITY_PROVIDER }}
         service_account: ${{ vars.GCP_SERVICE_ACCOUNT }}
 
-    # 3. Setup Terraform CLI on the runner
+    # 3. check connect to GCP
+    - name: Test gcloud CLI Connection
+      run: |
+        gcloud config list
+        gcloud auth list
+
+    # 4. Setup Terraform CLI on the runner
     - name: Setup Terraform
       uses: hashicorp/setup-terraform@v3.1.2
       with:
         terraform_version: "1.15.4"
 
 
-    # 4. check Terraform
+    # 5. check Terraform
     - name: terraform version check
       run: |
         echo "Display default terraform version"

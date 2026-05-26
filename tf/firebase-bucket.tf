@@ -5,7 +5,6 @@
 # ==============================================================================
 
 resource "google_storage_bucket" "firebase_storage" {
-  # 👇 CHANGED: Removed dots to bypass Google's Domain Ownership Verification check
   name          = "${var.gcp_project_id}-firebase-storage"
   location      = var.gcp_region
   force_destroy = false
@@ -53,7 +52,7 @@ EOF
 resource "google_firebaserules_release" "storage" {
   provider = google-beta
   project  = var.gcp_project_id
-  # 👇 CHANGED: Match the new custom bucket name format
+  # Match the new custom bucket name format
   name         = "firebase.storage/${var.gcp_project_id}-firebase-storage"
   ruleset_name = google_firebaserules_ruleset.storage.name
 

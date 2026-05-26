@@ -30,5 +30,5 @@ resource "google_cloud_scheduler_job" "report_trigger" {
   }
 
   # Ensure the Scheduler API is enabled before creating the job
-  depends_on = [google_project_service.scheduler_api]
+  depends_on = [google_project_service.required_apis]
 }

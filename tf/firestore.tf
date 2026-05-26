@@ -23,5 +23,5 @@ resource "google_firestore_database" "database" {
   deletion_policy = "POINT_IN_TIME_RECOVERY_RESTORATION_ONLY"
 
   # CRITICAL: Wait for the API to be fully enabled before creating the DB
-  depends_on = [google_project_service.firestore]
+  depends_on = [google_project_service.required_apis]
 }

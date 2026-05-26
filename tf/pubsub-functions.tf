@@ -9,7 +9,7 @@ resource "google_service_account" "function_sa" {
   display_name = "Service Account for Log Analyzer Cloud Run Functions"
 
   # wait until the IAM API (services.tf) is fully enabled
-  depends_on = [google_project_service.iam_api]
+  depends_on = [google_project_service.required_apis]
 }
 
 # ==========================================================================
@@ -39,7 +39,7 @@ resource "google_pubsub_topic" "log_events" {
   name = "${var.gcp_project_id}-${var.pubsub_topic_name_suffix}"
 
   # wait until the IAM API (services.tf) is fully enabled
-  depends_on = [google_project_service.iam_api]
+  depends_on = [google_project_service.required_apis]
 }
 
 # Allow Google Cloud Storage service to publish events into our Pub/Sub topic
@@ -59,5 +59,5 @@ resource "google_storage_notification" "bucket_notification" {
   event_types    = ["OBJECT_FINALIZE"] # Triggers ONLY when a file is fully uploaded
 
   # Ensure the IAM role is applied before creating the notification link
-  depends_on = [google_pubsub_topic_iam_member.gcs_publisher]
+  depends_on = [google_project_service.required_apis]
 }
