@@ -5,8 +5,8 @@
 resource "google_cloud_scheduler_job" "report_trigger" {
   name             = "${var.gcp_project_id}-${var.scheduler_name_suffix}"
   description      = "Triggers the Report Service Cloud Run function periodically"
-  schedule         = "0 18 * * 5" # Every Friday at 18:00
-  time_zone        = var.scheduler_timezone # 👇 Now dynamic via variable
+  schedule         = var.scheduler_cron_expression
+  time_zone        = var.scheduler_timezone
   attempt_deadline = "320s"
   region           = var.gcp_region
 
@@ -16,7 +16,8 @@ resource "google_cloud_scheduler_job" "report_trigger" {
     # Placeholder URL for the future Report Service (Project 3)
     uri = "https://report-service-placeholder-${var.gcp_region}.a.run.app/generate"
 
-    body = base64encode("{\"action\": \"generate_weekly_report\"}")
+    # 👇 Fixed: Changed from weekly to a generic action name suitable for daily runs
+    body = base64encode("{\"action\": \"generate_report\"}")
 
     headers = {
       "Content-Type" = "application/json"

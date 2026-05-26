@@ -38,3 +38,9 @@ variable "scheduler_timezone" {
   description = "The timezone for the Cloud Scheduler job (e.g., Europe/Kyiv, America/New_York)"
   default     = "Europe/Kyiv"
 }
+
+variable "scheduler_cron_expression" {
+  type        = string
+  description = "The CRON expression for the Cloud Scheduler job (e.g., '0 1 * * *' for daily at 01:00 AM)"
+  default     = "0 1 * * *"
+}
