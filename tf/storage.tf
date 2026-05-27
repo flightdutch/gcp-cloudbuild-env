@@ -34,7 +34,7 @@ resource "google_storage_bucket" "raw_logs" {
   # auto-cleaner - remove incomplete multi-component downloads that last more than 7 days
   lifecycle_rule {
     condition {
-      action_complete_days = 7
+      age = 7
     }
     action {
       type = "AbortIncompleteMultipartUpload"
