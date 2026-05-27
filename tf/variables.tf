@@ -62,3 +62,9 @@ variable "artifact_registry_retention_count" {
   default     = 10
   description = "The maximum number of recent container image versions to keep in Artifact Registry"
 }
+
+variable "raw_logs_retention_days" {
+  type        = number
+  default     = 90
+  description = "The number of days to retain raw log files in the storage bucket before automatic permanent deletion"
+}
